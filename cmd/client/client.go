@@ -23,7 +23,8 @@ func main() {
 
 	//AddUser(client)
 	//AddUserVerbose(client)
-	AddUsers(client)
+	//AddUsers(client)
+	AddUserStreamBoth(client)
 }
 
 func AddUser(client pb.UserServiceClient) {
@@ -119,5 +120,74 @@ func AddUsers(client pb.UserServiceClient) {
 	}
 
 	fmt.Println(res)
+
+}
+
+func AddUserStreamBoth(client pb.UserServiceClient) {
+
+	stream, err := client.AddUserSteamBoth(context.Background())
+	if err != nil {
+		log.Fatalf("Error creating request: %v", err)
+	}
+
+	usersToSend := []*pb.User{
+		&pb.User{
+			Id:    "1",
+			Name:  "User 1",
+			Email: "Email 1",
+		},
+		&pb.User{
+			Id:    "2",
+			Name:  "User 2",
+			Email: "Email 2",
+		},
+		&pb.User{
+			Id:    "3",
+			Name:  "User 3",
+			Email: "Email 3",
+		},
+		&pb.User{
+			Id:    "4",
+			Name:  "User 4",
+			Email: "Email 4",
+		},
+	}
+
+	go func() {
+		for _, user := range usersToSend {
+			fmt.Println("Sending user: ", user.GetName())
+			err := stream.Send(user)
+			if err != nil {
+				log.Fatalf("Error on sending request: %v", err)
+			}
+			time.Sleep(time.Second * 2)
+		}
+
+		err := stream.CloseSend()
+		if err != nil {
+			log.Fatalf("Error on receiving response of requests: %v", err)
+		}
+	}()
+
+	wait := make(chan int)
+
+	go func() {
+		for {
+			res, err := stream.Recv()
+			if err == io.EOF {
+				break
+			}
+
+			if err != nil {
+				log.Fatalf("Error on receiving data: %v", err)
+			}
+
+			fmt.Printf("Receiving user: %v with status: %v \r\n", res.GetUser().GetName(), res.GetStatus())
+		}
+
+		close(wait)
+	}()
+
+	<-wait
 
 }

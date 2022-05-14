@@ -124,7 +124,7 @@ func (*UserService) AddUsers(stream pb.UserService_AddUsersServer) error {
 	return nil
 }
 
-func (*UserService) AddUserStreamBoth(stream pb.UserService_AddUserSteamBothServer) error {
+func (*UserService) AddUserSteamBoth(stream pb.UserService_AddUserSteamBothServer) error {
 
 	for {
 		req, err := stream.Recv()
@@ -135,6 +135,8 @@ func (*UserService) AddUserStreamBoth(stream pb.UserService_AddUserSteamBothServ
 		if err != nil {
 			log.Fatalf("Error receiving stream from the client: %v", err)
 		}
+
+		fmt.Println("Reveiving....", req.GetName())
 
 		err = stream.Send(&pb.UserResultStream{
 			Status: "Added",
