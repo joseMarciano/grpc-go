@@ -94,7 +94,6 @@ func (*UserService) AddUserVerbose(req *pb.User, stream pb.UserService_AddUserVe
 	return nil
 }
 
-//AddUsers(UserService_AddUsersServer) error
 func (*UserService) AddUsers(stream pb.UserService_AddUsersServer) error {
 
 	users := []*pb.User{}
